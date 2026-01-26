@@ -1,0 +1,12 @@
+# Ignore everything by default
+*
+
+# Allow guardian folder
+!guardian/
+!guardian/**
+
+# Allow persona_router.py explicitly
+!persona_router.py
+
+# Allow .gitignore itself
+!.gitignore
