@@ -1,65 +1,78 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { ArrowRight } from "lucide-react"
+import { Sparkles, Shield, Zap } from "lucide-react";
 
 interface HeroProps {
-  setCurrentSection: (section: string) => void
+  setCurrentSection: (section: string) => void;
 }
 
 export function Hero({ setCurrentSection }: HeroProps) {
   return (
-    <section className="relative overflow-hidden px-4 py-24 sm:py-32 lg:px-8 min-h-screen flex items-center">
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute top-20 left-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl orb-1" />
-        <div className="absolute bottom-40 right-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl orb-2" />
-        <div className="absolute inset-0 bg-cool-overlay" />
-
-        {/* Grid pattern overlay */}
-        <svg className="absolute inset-0 w-full h-full grid-shimmer" preserveAspectRatio="none" aria-hidden="true">
-          <defs>
-            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-              <path
-                d="M 40 0 L 0 0 0 40"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="0.5"
-                className="text-primary/10"
-              />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#grid)" />
-        </svg>
-      </div>
-
-      <div className="mx-auto max-w-4xl w-full relative z-10">
+    <section className="relative overflow-hidden px-4 py-32 sm:py-40 lg:px-8 min-h-[90vh] flex items-center">
+      <div className="mx-auto max-w-5xl w-full relative z-10">
         <div className="text-center">
-          <div className="relative inline-block w-full">
-            <div className="absolute -inset-4 gradient-animated rounded-3xl blur-2xl opacity-30" aria-hidden="true" />
-            <h1 className="relative text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl text-balance animate-fade-in-up">
-              Real-time rule guidance for complex tasks
-            </h1>
-            </div>
+          {/* Floating badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-8 animate-fade-in-up border border-primary/20">
+            <Sparkles className="h-4 w-4 text-primary animate-pulse" />
+            <span className="text-sm font-medium">
+              AI-Powered Rule Guidance
+            </span>
+          </div>
 
-          <p className="mt-6 text-lg text-muted-foreground text-balance animate-fade-in-up">
-            Get AI-powered insights while you work. Our Rule-to-Action Engine analyzes documents and provides real-time
-            guidance to prevent costly mistakes in legal, financial, and regulatory contexts.
+          {/* Main heading with gradient */}
+          <div className="relative inline-block w-full mb-8">
+            <h1 className="relative text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl text-balance animate-fade-in-up leading-tight">
+              Real-time rule guidance for{" "}
+              <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-gradient-x">
+                complex tasks
+              </span>
+            </h1>
+          </div>
+
+          <p className="mt-8 text-lg sm:text-xl text-muted-foreground text-balance animate-fade-in-up max-w-3xl mx-auto leading-relaxed">
+            Navigate laws, regulations, and policies with confidence. Our AI
+            system observes your context and provides precise guidance at the
+            exact moment you need it—preventing mistakes before they happen.
           </p>
 
-          <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:justify-center animate-fade-in-up">
-            <Button
-              size="lg"
-              onClick={() => setCurrentSection("demo")}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2"
-            >
-              Try Demo <ArrowRight className="h-4 w-4" />
-            </Button>
-            <Button size="lg" variant="outline" onClick={() => setCurrentSection("pricing")}>
-              View Pricing
-            </Button>
+          {/* Feature pills */}
+          <div className="mt-12 flex flex-wrap justify-center gap-4 animate-fade-in-up">
+            <div className="flex items-center gap-2 px-5 py-3 rounded-full glass-card text-sm border border-primary/10 hover:border-primary/30 transition-all hover:scale-105">
+              <Shield className="h-4 w-4 text-primary" />
+              <span>Legal Compliance</span>
+            </div>
+            <div className="flex items-center gap-2 px-5 py-3 rounded-full glass-card text-sm border border-accent/10 hover:border-accent/30 transition-all hover:scale-105">
+              <Zap className="h-4 w-4 text-accent" />
+              <span>Real-time Analysis</span>
+            </div>
+            <div className="flex items-center gap-2 px-5 py-3 rounded-full glass-card text-sm border border-primary/10 hover:border-primary/30 transition-all hover:scale-105">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <span>Multi-Agent System</span>
+            </div>
+          </div>
+
+          {/* Trust indicators */}
+          <div className="mt-20 animate-fade-in-up">
+            <p className="text-sm text-muted-foreground mb-6 uppercase tracking-wider">
+              Trusted for high-stakes workflows
+            </p>
+            <div className="flex flex-wrap justify-center gap-10 text-sm text-muted-foreground">
+              <span className="hover:text-foreground transition-colors cursor-default">
+                Government Portals
+              </span>
+              <span className="hover:text-foreground transition-colors cursor-default">
+                Tax Filing
+              </span>
+              <span className="hover:text-foreground transition-colors cursor-default">
+                Legal Compliance
+              </span>
+              <span className="hover:text-foreground transition-colors cursor-default">
+                Financial Regulations
+              </span>
+            </div>
           </div>
         </div>
       </div>
     </section>
-  )
+  );
 }

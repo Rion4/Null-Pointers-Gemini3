@@ -47,7 +47,9 @@
 
 .dark {
   /* Dark mode with enhanced cool grey depth and visible grey tones */
-  --background: oklch(0.12 0.008 250); /* Visible dark cool grey, not pure black */
+  --background: oklch(
+    0.12 0.008 250
+  ); /* Visible dark cool grey, not pure black */
   --foreground: oklch(0.92 0.001 250); /* Off-white */
   --card: oklch(0.18 0.009 250); /* Noticeably lighter cool grey for cards */
   --card-foreground: oklch(0.92 0.001 250);
@@ -224,6 +226,65 @@
     }
   }
 
+  @keyframes floatSlow {
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+    33% {
+      transform: translate(30px, -30px) scale(1.05);
+    }
+    66% {
+      transform: translate(-20px, 20px) scale(0.95);
+    }
+  }
+
+  @keyframes floatSlower {
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+    33% {
+      transform: translate(-40px, 40px) scale(1.1);
+    }
+    66% {
+      transform: translate(30px, -20px) scale(0.9);
+    }
+  }
+
+  @keyframes pulseSlow {
+    0%,
+    100% {
+      opacity: 0.3;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.5;
+      transform: scale(1.05);
+    }
+  }
+
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes gradientX {
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
   @keyframes slideInFromLeft {
     from {
       opacity: 0;
@@ -238,10 +299,14 @@
   @keyframes glowPulse {
     0%,
     100% {
-      box-shadow: 0 0 0 0 rgba(82, 149, 255, 0.4), inset 0 0 20px rgba(82, 149, 255, 0.1);
+      box-shadow:
+        0 0 0 0 rgba(82, 149, 255, 0.4),
+        inset 0 0 20px rgba(82, 149, 255, 0.1);
     }
     50% {
-      box-shadow: 0 0 0 8px rgba(82, 149, 255, 0), inset 0 0 20px rgba(82, 149, 255, 0.15);
+      box-shadow:
+        0 0 0 8px rgba(82, 149, 255, 0),
+        inset 0 0 20px rgba(82, 149, 255, 0.15);
     }
   }
 
@@ -283,6 +348,27 @@
 
   .animate-fade-in-up {
     animation: fadeInUp 0.6s ease-out;
+  }
+
+  .animate-float-slow {
+    animation: floatSlow 20s ease-in-out infinite;
+  }
+
+  .animate-float-slower {
+    animation: floatSlower 25s ease-in-out infinite;
+  }
+
+  .animate-pulse-slow {
+    animation: pulseSlow 8s ease-in-out infinite;
+  }
+
+  .animate-slide-in-up {
+    animation: slideInUp 0.4s ease-out;
+  }
+
+  .animate-gradient-x {
+    background-size: 200% 200%;
+    animation: gradientX 3s ease infinite;
   }
 
   .animate-slide-in {
@@ -375,16 +461,28 @@
 
   /* Cool grey gradient backgrounds for professional cards */
   .bg-cool-gradient {
-    background: linear-gradient(135deg, oklch(0.98 0.002 250) 0%, oklch(0.94 0.003 250) 100%);
+    background: linear-gradient(
+      135deg,
+      oklch(0.98 0.002 250) 0%,
+      oklch(0.94 0.003 250) 100%
+    );
   }
 
   .dark .bg-cool-gradient {
-    background: linear-gradient(135deg, oklch(0.2 0.01 250) 0%, oklch(0.14 0.008 250) 100%);
+    background: linear-gradient(
+      135deg,
+      oklch(0.2 0.01 250) 0%,
+      oklch(0.14 0.008 250) 100%
+    );
   }
 
   /* Subtle cool grey overlay */
   .bg-cool-overlay {
-    background: linear-gradient(180deg, rgba(82, 149, 255, 0.04) 0%, rgba(101, 211, 196, 0.03) 100%);
+    background: linear-gradient(
+      180deg,
+      rgba(82, 149, 255, 0.04) 0%,
+      rgba(101, 211, 196, 0.03) 100%
+    );
   }
 
   /* Cool grey border glow with enhanced visibility */
@@ -395,15 +493,57 @@
   }
 
   .border-cool-glow:hover {
-    box-shadow: 0 0 40px rgba(82, 149, 255, 0.18), inset 0 0 16px rgba(82, 149, 255, 0.06);
+    box-shadow:
+      0 0 40px rgba(82, 149, 255, 0.18),
+      inset 0 0 16px rgba(82, 149, 255, 0.06);
   }
 
   /* Subtle grey line divider */
   .divider-cool {
-    background: linear-gradient(90deg, transparent, oklch(0.88 0.008 250), transparent);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      oklch(0.88 0.008 250),
+      transparent
+    );
   }
 
   .dark .divider-cool {
-    background: linear-gradient(90deg, transparent, oklch(0.25 0.008 250), transparent);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      oklch(0.25 0.008 250),
+      transparent
+    );
   }
+}
+
+/* Grid pattern background */
+.bg-grid-pattern {
+  background-image:
+    linear-gradient(to right, oklch(0.52 0.16 265 / 0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.52 0.16 265 / 0.1) 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: gridShimmer 4s ease-in-out infinite;
+}
+
+.dark .bg-grid-pattern {
+  background-image:
+    linear-gradient(to right, oklch(0.58 0.17 265 / 0.15) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.58 0.17 265 / 0.15) 1px, transparent 1px);
+}
+
+/* Additional utility classes */
+.scale-102 {
+  transform: scale(1.02);
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }

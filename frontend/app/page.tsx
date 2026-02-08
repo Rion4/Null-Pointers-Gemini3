@@ -1,37 +1,42 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Navigation } from "@/components/navigation"
-import { Hero } from "@/components/hero"
-import { BrowserDemo } from "@/components/browser-demo"
-import { Features } from "@/components/features"
-import { Pricing } from "@/components/pricing"
-import { Demo } from "@/components/demo"
-import { Docs } from "@/components/docs"
-import { Footer } from "@/components/footer"
+import { useState } from "react";
+import { Navigation } from "@/components/navigation";
+import { Hero } from "@/components/hero";
+import { InteractiveDemo } from "@/components/interactive-demo";
+import { Features } from "@/components/features";
+import { Footer } from "@/components/footer";
+import { DotMatrix } from "@/components/backgrounds/dot-matrix";
 
 export default function Home() {
-  const [currentSection, setCurrentSection] = useState("home")
+  const [currentSection, setCurrentSection] = useState("home");
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <Navigation currentSection={currentSection} setCurrentSection={setCurrentSection} />
+    <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
+      {/* Animated background - Dot Matrix */}
+      <DotMatrix />
 
-      {currentSection === "home" && (
-        <>
-          <Hero setCurrentSection={setCurrentSection} />
-          <BrowserDemo />
-          <Features />
-        </>
-      )}
+      {/* Gradient mask to fade dots under content */}
+      <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 2 }}>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background" />
+      </div>
 
-      {currentSection === "demo" && <Demo />}
+      {/* Subtle gradient orbs */}
+      <div className="fixed inset-0" style={{ zIndex: 0 }}>
+        <div className="absolute top-20 left-1/4 w-[600px] h-[600px] bg-primary/2 rounded-full blur-3xl animate-float-slow" />
+        <div className="absolute bottom-40 right-1/4 w-[500px] h-[500px] bg-accent/2 rounded-full blur-3xl animate-float-slower" />
+      </div>
 
-      {currentSection === "pricing" && <Pricing />}
-
-      {currentSection === "docs" && <Docs />}
-
-      <Footer />
+      <div className="relative" style={{ zIndex: 10 }}>
+        <Navigation
+          currentSection={currentSection}
+          setCurrentSection={setCurrentSection}
+        />
+        <Hero setCurrentSection={setCurrentSection} />
+        <InteractiveDemo />
+        <Features />
+        <Footer />
+      </div>
     </div>
-  )
+  );
 }
