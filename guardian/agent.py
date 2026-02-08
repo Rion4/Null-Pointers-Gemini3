@@ -1,138 +1,255 @@
+import os
+import json
+from dotenv import load_dotenv
+
 from google.adk.agents import LlmAgent
 from google.adk.runners import Runner
-from guardian.personas import legal, financial, insurance, compliance
 from google.adk.sessions.in_memory_session_service import InMemorySessionService
 from google.genai.types import Content, Part
 
+from guardian.personas import legal, financial, insurance, compliance
+from guardian.risk_scoring import score_risks   # 🔥 A4 IMPORT
 
-# Personas
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
+
+# ==================================================
+# CONSTANTS (IMPORTANT FOR ADK SESSION STABILITY)
+# ==================================================
+
+USER_ID = "clauseguard_user"
+SESSION_ID = "clauseguard_session"
+
+# ==================================================
+# PERSONA REGISTRY (CONFIG ONLY)
+# ==================================================
+
 PERSONA_MAP = {
     "legal": legal,
     "financial": financial,
     "insurance": insurance,
-    "compliance": compliance
+    "compliance": compliance,
 }
 
+# ==================================================
+# SINGLE CORE AGENT (ONLY ONE LLM AGENT)
+# ==================================================
 
-# Main Agent
 clause_guard = LlmAgent(
     name="ClauseGuard_Core",
-    model="gemini-2.5-flash",
+    model="gemini-2.0-flash",
     instruction="""
-You are ClauseGuard, a data-centric risk interpretation system.
+You are ClauseGuard — a data-centric risk interpretation system.
 
-Your primary function is to analyze risks, obligations, and hidden implications
-in high-stakes documents such as contracts, financial disclosures, insurance
-policies, and compliance agreements.
+Your mission is to prevent users from unknowingly committing
+incorrect, dangerous, or irreversible data in high-stakes workflows.
 
-However, users may not always have a document immediately.
+You operate in TWO MODES:
 
-When NO document is provided:
-- You MAY answer conceptual or preparatory questions
-- You MUST frame answers in terms of risk awareness, compliance, or data correctness
-- You MUST NOT provide personalized legal, financial, or tax advice
-- You SHOULD explain what risks to watch for and what documents or clauses matter
+PREVENTIVE MODE (no document provided):
+- Educate users about risks before commitment
+- Explain what clauses, data fields, or assumptions matter
+- NEVER refuse to help
 
-When a document IS provided:
-- Perform detailed semantic risk analysis
-- Cite exact clauses
-- Explain consequences of acceptance
+ANALYSIS MODE (document provided):
+- Perform semantic risk analysis
+- Identify hidden obligations and fine print
+- Quote exact clauses
+- Explain consequences clearly
 
-You can temporarily adopt internal expert personas (legal, financial, insurance,
-compliance) to reason correctly, but you are NOT a replacement for a licensed
-professional.
+You may internally adopt expert personas:
+- Legal
+- Financial
+- Insurance
+- Compliance
 
-Always guide the user toward safer decisions.
+You are NOT a licensed professional.
+Your role is risk awareness, not advice.
 """
 )
 
+# ==================================================
+# RUNNER (REQUIRED FOR PROGRAMMATIC EXECUTION)
+# ==================================================
 
-# Runner 
 session_service = InMemorySessionService()
-runner = Runner(
-    agent=clause_guard,
-    app_name="guardian_cli",  # Required by ADK runner
-    session_service=session_service
+session_service.create_session_sync(
+    app_name="guardian_app",
+    user_id=USER_ID,
+    session_id=SESSION_ID,
 )
 
+runner = Runner(
+    agent=clause_guard,
+    app_name="guardian_app",
+    session_service=session_service,
+)
 
+# ==================================================
+# PERSONA SELECTION FOR CONSENSUS
+# ==================================================
 
-# Heuristic Persona Router 
+def determine_required_personas(document: str) -> list[str]:
+    """
+    Decide which personas must review this document.
+    Legal is always included.
+    """
+    text = document.lower()
+    personas = {"legal"}
 
-def _heuristic_router(query, file_context=""):
-    text = (query + " " + file_context).lower()
+    if any(w in text for w in ["tax", "fee", "payment", "penalty", "gst", "vat"]):
+        personas.add("financial")
+    if any(w in text for w in ["insurance", "policy", "claim", "coverage"]):
+        personas.add("insurance")
+    if any(w in text for w in ["data", "privacy", "ai training", "gdpr"]):
+        personas.add("compliance")
 
-    if any(w in text for w in ["tax", "cost", "fee", "payment", "salary", "audit", "gst", "vat"]):
-        return "financial"
-    if any(w in text for w in ["insurance", "policy", "claim", "coverage", "deductible", "accident"]):
-        return "insurance"
-    if any(w in text for w in ["data", "privacy", "gdpr", "ai training", "consent", "cookie"]):
-        return "compliance"
+    return list(personas)
 
-    return "legal"
+# ==================================================
+# INTERNAL PERSONA PASS (A3 STRUCTURED OUTPUT)
+# ==================================================
 
-def run_clauseguard(user_choice_key, user_query, file_context=None):
-    selected_key = "legal"
-
-
-    # Persona Selection
-    if user_choice_key in ["5", "not sure"]:
-        selected_key = _heuristic_router(user_query, file_context or "")
-        print(f"⚡ [System] Auto-switched to: {selected_key.upper()}")
-
-    elif user_choice_key in ["1", "2", "3", "4"]:
-        selected_key = {
-            "1": "legal",
-            "2": "financial",
-            "3": "insurance",
-            "4": "compliance"
-        }.get(user_choice_key, "legal")
-
-    persona = PERSONA_MAP[selected_key]
-
-    # Context Injection
-    dynamic_prompt = f"""
-    [SYSTEM MODE: ACTIVATE PERSONA '{persona.NAME}']
-    {persona.SYSTEM_INSTRUCTION}
-
-    [DOCUMENT CONTEXT]
-    {file_context if file_context else "No document provided."}
-
-    [USER QUESTION]
-    {user_query}
+def _run_persona_pass(persona, document: str) -> list[dict]:
+    """
+    Runs one expert reasoning pass and returns STRUCTURED RISK OBJECTS.
+    SAME agent, SAME session (ADK-correct).
     """
 
+    prompt = f"""
+[SYSTEM MODE: ACTIVATE PERSONA '{persona.NAME}']
+{persona.SYSTEM_INSTRUCTION}
+
+[DOCUMENT UNDER REVIEW]
+{document}
+
+TASK:
+Extract ONLY risks from your domain.
+
+Return ONLY a valid JSON array.
+NO markdown. NO explanations.
+
+Each object MUST follow this schema exactly:
+
+{{
+  "risk_id": "{persona.NAME.upper()}-###",
+  "persona": "{persona.NAME}",
+  "clause_text": "",
+  "risk_summary": "",
+  "severity": "LOW | MEDIUM | HIGH | CRITICAL",
+  "irreversible": true | false,
+  "risk_category": "",
+  "why_it_matters": "",
+  "user_impact": "",
+  "confidence": 0.0
+}}
+"""
+
+    message = Content(
+        role="user",
+        parts=[Part(text=prompt)],
+    )
+
+    events = runner.run(
+        user_id=USER_ID,
+        session_id=SESSION_ID,
+        new_message=message,
+    )
+
+    raw_output = ""
+    for event in events:
+        if event.content and event.content.parts:
+            for part in event.content.parts:
+                if part.text:
+                    raw_output += part.text
 
     try:
-        # Try synchronous creation if available, or just standard creation
-        if hasattr(session_service, "create_session_sync"):
-            session_service.create_session_sync(session_id="test_session")
-        else:
-             # Fallback: simple create 
-            session_service.create_session(session_id="test_session")
-    except Exception:
-        pass # Session might already exist
+        # Better JSON extraction in case of markdown wrapping
+        clean_output = raw_output.strip()
+        if clean_output.startswith("```json"):
+            clean_output = clean_output.split("```json")[1].split("```")[0].strip()
+        elif clean_output.startswith("```"):
+            clean_output = clean_output.split("```")[1].split("```")[0].strip()
+            
+        return json.loads(clean_output)
+    except (json.JSONDecodeError, IndexError, ValueError):
+        # Hard guardrail: never crash the pipeline
+        return []
 
-    # Runner.run() requires a Content object
-    message_content = Content(
+# ==================================================
+# 🔥 MULTI-PERSONA CONSENSUS + A4 SCORING
+# ==================================================
+
+def run_clauseguard_consensus(user_query: str, file_context: str):
+    """
+    Full ClauseGuard pipeline:
+    - Multi-persona risk extraction (A2)
+    - Structured risk objects (A3)
+    - Risk scoring & verdict (A4)
+    """
+
+    persona_keys = determine_required_personas(file_context)
+    persona_modules = [PERSONA_MAP[k] for k in persona_keys]
+
+    print(f"🧠 [System] Personas engaged: {', '.join(persona_keys)}")
+
+    all_risks = []
+
+    # --- Persona Passes ---
+    for persona in persona_modules:
+        risks = _run_persona_pass(
+            persona=persona,
+            document=file_context
+        )
+        all_risks.extend(risks)
+
+    # --- A4: Risk Scoring & Verdict ---
+    scoring = score_risks(all_risks)
+
+    # --- Human-Readable Synthesis ---
+    synthesis_prompt = f"""
+You are ClauseGuard.
+
+Below is a list of structured risk objects and their scores:
+
+{scoring}
+
+TASK:
+1. Explain the most dangerous risks in plain language
+2. Clearly justify the final verdict
+3. Highlight irreversible consequences
+4. Keep it concise and non-technical
+
+Produce a short user-facing explanation.
+"""
+
+    message = Content(
         role="user",
-        parts=[Part(text=dynamic_prompt)]
+        parts=[Part(text=synthesis_prompt)],
     )
-    
-    events = list(runner.run(
-        user_id="test_user",
-        session_id="test_session",
-        new_message=message_content
-    ))
 
-    final_text = ""
+    events = runner.run(
+        user_id=USER_ID,
+        session_id=SESSION_ID,
+        new_message=message,
+    )
+
+    summary = ""
     for event in events:
-        if event.type == "model_response":
-            final_text += event.content or ""
+        if event.content and event.content.parts:
+            for part in event.content.parts:
+                if part.text:
+                    summary += part.text
 
     return {
-        "persona_used": persona.NAME,
-        "response": final_text.strip()
+        "document_type": "unknown",
+        "personas_used": persona_keys,
+        "risk_count": len(all_risks),
+        "risk_analysis": scoring,
+        "summary": summary.strip(),
     }
+
+# ==================================================
+# ADK ENTRY POINT
+# ==================================================
 
 root_agent = clause_guard

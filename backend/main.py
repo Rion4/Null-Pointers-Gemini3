@@ -1,11 +1,20 @@
 # backend/main.py
 import os
 import io
-from fastapi import FastAPI, UploadFile, File, HTTPException, Body
+import sys
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from pypdf import PdfReader
-from google import genai # Use the new Google GenAI SDK
+from dotenv import load_dotenv
+
+# Add the project root to sys.path so we can import 'guardian'
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from guardian.agent import run_clauseguard_consensus
+
+# Load environment variables from the root .env
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
 
 app = FastAPI()
 
@@ -17,11 +26,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# 1. Secure API Client Initialization
-# Ensure GEMINI_API_KEY is set in your server's .env file
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
-client = genai.Client(api_key=GEMINI_API_KEY)
 
 class AnalysisRequest(BaseModel):
     content: str
@@ -44,22 +48,21 @@ async def upload_document(file: UploadFile = File(...)):
 
 @app.post("/api/analyze")
 async def analyze_content(data: AnalysisRequest):
-    """Communicates with Gemini 2.0 Flash."""
+    """Communicates with ClauseGuard consensus engine."""
     try:
-        # Construct the specialized system prompt for your 8 personas
-        system_instruction = f"Context: {data.context}. Analyze as legal, tax, and compliance experts."
-        
-        response = client.models.generate_content(
-            model="gemini-2.0-flash",
-            contents=data.content,
-            config={"system_instruction": system_instruction}
+        # Use the actual ADK-powered consensus engine
+        result = run_clauseguard_consensus(
+            user_query=data.context,
+            file_context=data.content
         )
         
-        # In a real ADK setup, you would use root_agent.run() here
         return {
-            "analysis": response.text,
-            "detected_personas": ["lawyer", "compliance", "auditor"], # Mock logic
+            "analysis": result["summary"],
+            "detected_personas": result["personas_used"],
+            "risk_count": result["risk_count"],
+            "risk_analysis": result["risk_analysis"],
             "status": "success"
         }
     except Exception as e:
+        print(f"Analysis error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
