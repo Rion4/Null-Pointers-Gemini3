@@ -28,6 +28,9 @@ dist/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+*_logs.json
+*_logs*.json
+logs_*.txt
 
 # Editor/System
 .vscode/
@@ -39,3 +42,28 @@ Thumbs.db
 # ADK specifics
 .adk/
 **/__pycache__/
+
+# Debug / test scripts (keep test_pipeline.py and test_tools.py if needed)
+backend/check_*.py
+backend/list_models*.py
+backend/repro.py
+backend/test_imports.py
+backend/test_live.py
+backend/test_model.py
+
+# SQLite session DB (runtime artifact)
+*.db
+
+# Screenshots / debug images
+*.png
+!frontend/public/**/*.png
+
+# Graphify output
+graphify-out/
+
+# Stagehand / browser profiles
+frontend/--full-page
+frontend/\\*
+
+# Temp files
+IMPLEMENTATION_PLAN.md

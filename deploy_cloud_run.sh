@@ -38,7 +38,7 @@ gcloud run deploy guardian-backend \
   --region $REGION \
   --allow-unauthenticated \
   --project $PROJECT_ID \
-  --set-env-vars GOOGLE_API_KEY=${GOOGLE_API_KEY}
+  --set-env-vars GOOGLE_API_KEY=${GOOGLE_API_KEY},GOOGLE_GENAI_USE_VERTEXAI=0
 
 # Get Backend URL
 BACKEND_URL=$(gcloud run services describe guardian-backend --platform managed --region $REGION --format 'value(status.url)' --project $PROJECT_ID)
@@ -49,10 +49,8 @@ echo ""
 echo "--- Deploying Frontend ---"
 echo "Building frontend with API URL: $BACKEND_URL"
 # We pass the backend URL as a build argument so Next.js can bake it in
-gcloud builds submit --tag gcr.io/$PROJECT_ID/guardian-frontend ./frontend \
-  --project $PROJECT_ID \
-  --substitutions=_NEXT_PUBLIC_API_URL=$BACKEND_URL \
-  --build-arg NEXT_PUBLIC_API_URL=$BACKEND_URL
+gcloud builds submit --config ./frontend/cloudbuild.yaml --substitutions=_NEXT_PUBLIC_API_URL=$BACKEND_URL,_IMAGE_NAME=gcr.io/$PROJECT_ID/guardian-frontend ./frontend \
+  --project $PROJECT_ID
 
 echo "Deploying frontend service..."
 gcloud run deploy guardian-frontend \

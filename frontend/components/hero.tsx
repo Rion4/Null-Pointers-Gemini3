@@ -1,77 +1,89 @@
 "use client";
 
-import { Sparkles, Shield, Zap } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-interface HeroProps {
-  setCurrentSection: (section: string) => void;
+function ShieldLogo({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <defs>
+        <linearGradient id="hero-shield-g" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%"   stopColor="#4285F4" />
+          <stop offset="33%"  stopColor="#EA4335" />
+          <stop offset="66%"  stopColor="#FBBC04" />
+          <stop offset="100%" stopColor="#34A853" />
+        </linearGradient>
+      </defs>
+      <path
+        d="M12 2L4 6v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V6l-8-4z"
+        fill="url(#hero-shield-g)"
+      />
+    </svg>
+  );
 }
 
-export function Hero({ setCurrentSection }: HeroProps) {
+export function Hero() {
+  const router = useRouter();
+
   return (
-    <section className="relative overflow-hidden px-4 py-32 sm:py-40 lg:px-8 min-h-[90vh] flex items-center">
-      <div className="mx-auto max-w-5xl w-full relative z-10">
-        <div className="text-center">
-          {/* Floating badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-8 animate-fade-in-up border border-primary/20">
-            <Sparkles className="h-4 w-4 text-primary animate-pulse" />
-            <span className="text-sm font-medium">
-              AI-Powered Rule Guidance
-            </span>
-          </div>
+    <section className="relative min-h-[calc(100vh-60px)] overflow-hidden bg-background flex flex-col items-center justify-center px-6 pb-12 pt-16">
 
-          {/* Main heading with gradient */}
-          <div className="relative inline-block w-full mb-8">
-            <h1 className="relative text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl text-balance animate-fade-in-up leading-tight">
-              Real-time rule guidance for{" "}
-              <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-gradient-x">
-                complex tasks
-              </span>
-            </h1>
-          </div>
+      {/* ── Dot matrix base layer — always-visible dim grid ── */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle, oklch(0.5 0.01 264 / 0.2) 1px, transparent 1px)",
+          backgroundSize: "28px 28px",
+        }}
+      />
 
-          <p className="mt-8 text-lg sm:text-xl text-muted-foreground text-balance animate-fade-in-up max-w-3xl mx-auto leading-relaxed">
-            Navigate laws, regulations, and policies with confidence. Our AI
-            system observes your context and provides precise guidance at the
-            exact moment you need it—preventing mistakes before they happen.
-          </p>
+      {/* ── Dot matrix highlight layer — revealed by cursor via CSS var ── */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle, oklch(0.48 0.19 265 / 0.9) 1.5px, transparent 1.5px)",
+          backgroundSize: "28px 28px",
+          WebkitMaskImage:
+            "radial-gradient(circle 260px at var(--cursor-x, -9999px) var(--cursor-y, -9999px), black 0%, transparent 100%)",
+          maskImage:
+            "radial-gradient(circle 260px at var(--cursor-x, -9999px) var(--cursor-y, -9999px), black 0%, transparent 100%)",
+        }}
+      />
 
-          {/* Feature pills */}
-          <div className="mt-12 flex flex-wrap justify-center gap-4 animate-fade-in-up">
-            <div className="flex items-center gap-2 px-5 py-3 rounded-full glass-card text-sm border border-primary/10 hover:border-primary/30 transition-all hover:scale-105">
-              <Shield className="h-4 w-4 text-primary" />
-              <span>Legal Compliance</span>
-            </div>
-            <div className="flex items-center gap-2 px-5 py-3 rounded-full glass-card text-sm border border-accent/10 hover:border-accent/30 transition-all hover:scale-105">
-              <Zap className="h-4 w-4 text-accent" />
-              <span>Real-time Analysis</span>
-            </div>
-            <div className="flex items-center gap-2 px-5 py-3 rounded-full glass-card text-sm border border-primary/10 hover:border-primary/30 transition-all hover:scale-105">
-              <Sparkles className="h-4 w-4 text-primary" />
-              <span>Multi-Agent System</span>
-            </div>
-          </div>
+      {/* Content */}
+      <div className="relative z-10 flex flex-col items-center text-center max-w-4xl mx-auto">
 
-          {/* Trust indicators */}
-          <div className="mt-20 animate-fade-in-up">
-            <p className="text-sm text-muted-foreground mb-6 uppercase tracking-wider">
-              Trusted for high-stakes workflows
-            </p>
-            <div className="flex flex-wrap justify-center gap-10 text-sm text-muted-foreground">
-              <span className="hover:text-foreground transition-colors cursor-default">
-                Government Portals
-              </span>
-              <span className="hover:text-foreground transition-colors cursor-default">
-                Tax Filing
-              </span>
-              <span className="hover:text-foreground transition-colors cursor-default">
-                Legal Compliance
-              </span>
-              <span className="hover:text-foreground transition-colors cursor-default">
-                Financial Regulations
-              </span>
-            </div>
-          </div>
+        {/* Brand lockup */}
+        <div className="flex items-center gap-2 mb-8">
+          <ShieldLogo />
+          <span className="text-sm font-medium text-muted-foreground tracking-tight">
+            ClauseGuard
+          </span>
         </div>
+
+        {/* Headline */}
+        <h1 className="text-5xl sm:text-6xl lg:text-[5.5rem] font-bold text-foreground leading-[1.05] tracking-tight">
+          Analyze contracts<br />before you sign.
+        </h1>
+
+        {/* CTAs */}
+        <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
+          <button
+            onClick={() => router.push("/chat")}
+            className="flex items-center gap-2 px-7 py-4 rounded-full bg-foreground text-background text-sm font-semibold hover:opacity-80 active:scale-[0.97] transition-all duration-150"
+          >
+            <ShieldLogo size={15} />
+            Analyze a contract
+          </button>
+          <button
+            onClick={() => router.push("/compare")}
+            className="px-7 py-4 rounded-full border border-border text-sm font-medium text-foreground hover:bg-muted/60 active:scale-[0.97] transition-all duration-150"
+          >
+            Explore use cases
+          </button>
+        </div>
+
       </div>
     </section>
   );

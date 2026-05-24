@@ -1,82 +1,72 @@
-import { Shield, Github, Twitter, Linkedin, Heart } from "lucide-react";
+const LINKS = {
+  Product:     ["Analysis", "Compare", "History", "API"],
+  "Use Cases": ["NDAs", "Employment", "SaaS Contracts", "Vendor Terms"],
+  Resources:   ["Documentation", "Blog", "Changelog", "Status"],
+  Company:     ["About", "Privacy", "Terms", "Contact"],
+};
 
 export function Footer() {
-  const currentYear = new Date().getFullYear();
+  const year = new Date().getFullYear();
 
   return (
-    <footer className="relative border-t border-border/50 glass-effect py-12 px-4 lg:px-8 mt-20">
-      {/* Decorative gradient line */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
-
+    <footer className="bg-background border-t border-border px-6 lg:px-8 pt-16 pb-10">
       <div className="mx-auto max-w-7xl">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-          {/* Logo and tagline */}
-          <div className="flex flex-col items-center md:items-start gap-3">
-            <div className="flex items-center gap-2 group">
-              <div className="relative">
-                <Shield className="h-6 w-6 text-primary group-hover:scale-110 transition-transform" />
-                <div className="absolute inset-0 bg-primary/20 blur-lg rounded-full group-hover:bg-primary/30 transition-all" />
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-                RuleGuard
-              </span>
+
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-10 mb-14">
+
+          <div className="col-span-2 md:col-span-1">
+            <div className="flex items-center gap-2 mb-3">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <defs>
+                  <linearGradient id="footer-shield-g" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%"   stopColor="#4285F4" />
+                    <stop offset="33%"  stopColor="#EA4335" />
+                    <stop offset="66%"  stopColor="#FBBC04" />
+                    <stop offset="100%" stopColor="#34A853" />
+                  </linearGradient>
+                </defs>
+                <path d="M12 2L4 6v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V6l-8-4z" fill="url(#footer-shield-g)" />
+              </svg>
+              <span className="font-semibold text-[15px] text-foreground">ClauseGuard</span>
             </div>
-            <p className="text-sm text-muted-foreground text-center md:text-left max-w-xs">
-              AI-powered guidance for complex rules and regulations
+            <p className="text-xs text-muted-foreground leading-relaxed max-w-[180px]">
+              AI-powered contract risk analysis for everyone.
             </p>
           </div>
 
-          {/* Center - Made with love */}
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span>Built with</span>
-            <Heart className="h-4 w-4 text-destructive fill-destructive animate-pulse" />
-            <span>for hackathon {currentYear}</span>
-          </div>
+          {Object.entries(LINKS).map(([heading, items]) => (
+            <div key={heading}>
+              <p className="text-xs font-semibold text-foreground uppercase tracking-widest mb-4">
+                {heading}
+              </p>
+              <ul className="space-y-3">
+                {items.map((item) => (
+                  <li key={item}>
+                    <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-150">
+                      {item}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
 
-          {/* Social links */}
-          <div className="flex gap-3">
-            <a
-              href="#"
-              className="p-3 rounded-xl glass-card hover:bg-primary/10 transition-all hover:scale-110 active:scale-95 border border-border/50 hover:border-primary/30 group"
-              aria-label="GitHub"
-            >
-              <Github className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-            </a>
-            <a
-              href="#"
-              className="p-3 rounded-xl glass-card hover:bg-primary/10 transition-all hover:scale-110 active:scale-95 border border-border/50 hover:border-primary/30 group"
-              aria-label="Twitter"
-            >
-              <Twitter className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-            </a>
-            <a
-              href="#"
-              className="p-3 rounded-xl glass-card hover:bg-primary/10 transition-all hover:scale-110 active:scale-95 border border-border/50 hover:border-primary/30 group"
-              aria-label="LinkedIn"
-            >
-              <Linkedin className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-            </a>
+        </div>
+
+        <div className="pt-8 border-t border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <p className="text-xs text-muted-foreground">
+            © {year} ClauseGuard. All rights reserved.
+          </p>
+          <div className="flex gap-5">
+            {["Privacy", "Terms", "Cookies"].map((l) => (
+              <a key={l} href="#" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                {l}
+              </a>
+            ))}
           </div>
         </div>
 
-        {/* Bottom bar */}
-        <div className="mt-8 pt-8 border-t border-border/30 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-muted-foreground">
-          <p>&copy; {currentYear} RuleGuard. All rights reserved.</p>
-          <div className="flex gap-6">
-            <a href="#" className="hover:text-primary transition-colors">
-              Privacy Policy
-            </a>
-            <a href="#" className="hover:text-primary transition-colors">
-              Terms of Service
-            </a>
-            <a href="#" className="hover:text-primary transition-colors">
-              Contact
-            </a>
-          </div>
-        </div>
       </div>
     </footer>
   );
 }
-
-

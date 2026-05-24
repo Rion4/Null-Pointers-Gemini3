@@ -1,11 +1,12 @@
 import type React from "react";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ClientLayout from "./ClientLayout";
 
-const geistSans = Geist({
+const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
   variable: "--font-sans",
 });
 const geistMono = Geist_Mono({
@@ -14,10 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "RuleGuard - AI-Powered Rule Guidance",
+  title: "ClauseGuard — AI Contract Analysis",
   description:
-    "Real-time rule guidance for complex tasks. Navigate laws, regulations, and policies with AI-powered precision.",
-  generator: "v0.app",
+    "Analyze any contract before you sign. Four specialized AI agents deliver a structured risk verdict in under 60 seconds.",
 };
 
 export default function RootLayout({
@@ -28,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
+        className={`${plusJakarta.variable} ${geistMono.variable} font-sans antialiased`}
       >
         <ClientLayout>{children}</ClientLayout>
       </body>
