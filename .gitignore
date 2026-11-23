@@ -67,3 +67,9 @@ frontend/\\*
 
 # Temp files
 IMPLEMENTATION_PLAN.md
+
+# Cerebe per-dev overlay (restrict-only; leftover darkfactory.* still ignored)
+cerebe.local.yaml
+cerebe.local.yml
+darkfactory.local.yaml
+darkfactory.local.yml
